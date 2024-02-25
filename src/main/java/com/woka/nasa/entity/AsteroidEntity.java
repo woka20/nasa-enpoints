@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class AsteroidEntity {
 
-    private String id;
+    private String asteroidId;
     private String date;
-    private Float distanceToEarth;    
+    private Float distanceToEarthInKm;    
 }

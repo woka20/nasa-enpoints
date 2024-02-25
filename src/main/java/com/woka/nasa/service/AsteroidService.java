@@ -41,19 +41,20 @@ public class AsteroidService {
         try{
             ResponseEntity<String> responseEntity = restTemplate.getForEntity(API_URL, String.class);
             String response = responseEntity.getBody();
-
+             
             if (responseEntity.getStatusCode() != HttpStatusCode.valueOf(200)){
                 throw new NullPointerException();
             }
-           
+         
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(response);
 
             // Convert JsonNode to JSONObject if needed
             JSONObject jsonObject = new JSONObject(jsonNode.toString());
-          
+                
            
             JSONObject near=jsonObject.getJSONObject("near_earth_objects");
+            
             for (String date: near.keySet()){
                 
                 JSONArray obj= near.getJSONArray(date);
@@ -63,7 +64,7 @@ public class AsteroidService {
                     AsteroidEntity att= new AsteroidEntity();
                 // log.info("Parsed JSON: {}", date);
                     att.setDate(date);  
-                    att.setId(obj.getJSONObject(i).getString("id"));
+                    att.setAsteroidId(obj.getJSONObject(i).getString("id"));
                     JSONArray obj2=obj.getJSONObject(i).getJSONArray("close_approach_data");
                     for (int j = 0; j < obj2.length();j++){
                         String dist=obj2.getJSONObject(j).getJSONObject("miss_distance").getString("kilometers");
@@ -72,12 +73,15 @@ public class AsteroidService {
                             minDistance = check;
                         }
                     }
-                    att.setDistanceToEarth(minDistance);
+                    att.setDistanceToEarthInKm(minDistance);
                     listAtt.add(att);
                 };
               
             }
-            Collections.sort(listAtt, Comparator.comparingDouble(AsteroidEntity::getDistanceToEarth));
+            if(size <=0){
+                size=10;
+            }
+            Collections.sort(listAtt, Comparator.comparingDouble(AsteroidEntity::getDistanceToEarthInKm));
             return listAtt.subList(0, Math.min(size, listAtt.size()));
         }catch(Exception e){
              e.printStackTrace();

@@ -2,6 +2,8 @@ package com.woka.nasa.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.tomcat.util.json.JSONParser;
@@ -32,7 +34,7 @@ public class AsteroidService {
         this.restTemplate = restTemplate;
     }
 
-    public List<AsteroidEntity> fetchDataFromThirdParty(String start, String end)  {
+    public List<AsteroidEntity> fetchDataFromThirdParty(String start, String end, int size)  {
         // Make GET request to third-party API
         String API_URL = String.format("https://api.nasa.gov/neo/rest/v1/feed?start_date=%s&end_date=%s&api_key=DEMO_KEY", start, end);
         List<AsteroidEntity> listAtt= new ArrayList<AsteroidEntity>();
@@ -75,7 +77,8 @@ public class AsteroidService {
                 };
               
             }
-            return listAtt;
+            Collections.sort(listAtt, Comparator.comparingDouble(AsteroidEntity::getDistanceToEarth));
+            return listAtt.subList(0, Math.min(size, listAtt.size()));
         }catch(Exception e){
              e.printStackTrace();
              return null;
